@@ -99,7 +99,9 @@ public class ATMScreen {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(
                     frame,
-                    "Database Error"
+                    "Database Error: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
                 );
             }
         });
@@ -117,7 +119,7 @@ public class ATMScreen {
         btn.setFocusPainted(false);
 
         btn.addActionListener(e ->
-            pinField.setText(pinField.getText() + text)
+            pinField.setText(new String(pinField.getPassword()) + text)
         );
 
         return btn;

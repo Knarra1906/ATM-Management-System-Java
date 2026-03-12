@@ -1,9 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.sql.*;
 
 public class SignUpPageOne extends JFrame {
+    private static final DateTimeFormatter DOB_FORMATTER =
+        DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     JTextField name, father, dob, email, address, city, pincode, state;
     JRadioButton male, female;
@@ -136,8 +142,14 @@ public class SignUpPageOne extends JFrame {
             return;
         }
 
-        if (!dobVal.matches("\\d{2}/\\d{2}/\\d{4}")) {
+        LocalDate parsedDob = parseDob(dobVal);
+        if (parsedDob == null) {
             JOptionPane.showMessageDialog(this, "DOB must be in DD/MM/YYYY format");
+            return;
+        }
+
+        if (parsedDob.isAfter(LocalDate.now())) {
+            JOptionPane.showMessageDialog(this, "DOB cannot be in the future");
             return;
         }
 
@@ -196,7 +208,20 @@ public class SignUpPageOne extends JFrame {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database Error (Page 1)");
+            JOptionPane.showMessageDialog(
+                this,
+                "Database Error (Page 1): " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private LocalDate parseDob(String dobValue) {
+        try {
+            return LocalDate.parse(dobValue, DOB_FORMATTER);
+        } catch (DateTimeParseException ex) {
+            return null;
         }
     }
 }

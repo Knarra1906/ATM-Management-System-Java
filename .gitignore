@@ -1,5 +1,6 @@
 # Java compiled files
 *.class
+out/
 
 # IDE / Editor files
 .vscode/

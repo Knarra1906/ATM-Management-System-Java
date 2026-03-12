@@ -149,12 +149,14 @@ public class SignUpPageTwo extends JFrame {
             ps.executeUpdate();
 
             dispose();
-            new SignUpPageThree();
+            new SignUpPageThree(appNo);
 
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "Database Error (Page 2)");
+                    "Database Error (Page 2): " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 }

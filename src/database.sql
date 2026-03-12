@@ -42,6 +42,9 @@ CREATE TABLE signup_page2 (
     pan VARCHAR(10),
     aadhar VARCHAR(12) NOT NULL,
     senior_citizen VARCHAR(5) NOT NULL,
+    account_type VARCHAR(20),
+    nominee_name VARCHAR(50),
+    card_issued VARCHAR(5),
 
     CONSTRAINT fk_app_no
         FOREIGN KEY (app_no)
@@ -78,12 +81,33 @@ CREATE TABLE accounts (
 );
 
 -- ==============================
+-- TRANSACTIONS (MINI STATEMENT)
+-- ==============================
+
+DROP TABLE IF EXISTS transactions;
+
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    card_no VARCHAR(20) NOT NULL,
+    txn_type VARCHAR(20) NOT NULL,
+    amount DOUBLE NOT NULL,
+    txn_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_txn_card_no
+        FOREIGN KEY (card_no)
+        REFERENCES users(card_no)
+        ON DELETE CASCADE
+);
+
+-- ==============================
 -- TEST DATA (OPTIONAL)
 -- ==============================
 
 -- Dummy user for login testing
 INSERT INTO users VALUES ('1234567890123456', '1234', 'User');
 INSERT INTO accounts VALUES ('1234567890123456', 5000);
+INSERT INTO transactions (card_no, txn_type, amount) VALUES ('1234567890123456', 'DEPOSIT', 3000);
+INSERT INTO transactions (card_no, txn_type, amount) VALUES ('1234567890123456', 'WITHDRAW', 1000);
 
 -- ==============================
 -- VERIFY TABLES
@@ -93,3 +117,4 @@ SELECT * FROM signup_page1;
 SELECT * FROM signup_page2;
 SELECT * FROM users;
 SELECT * FROM accounts;
+SELECT * FROM transactions;

@@ -1,138 +1,131 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Login extends JFrame {
 
-    JTextField cardField;
-    JPasswordField pinField;
-    JTextField activeField;
+    private final JTextField cardField;
+    private final JPasswordField pinField;
+    private JTextField activeField;
 
     public Login() {
-
-        setTitle("ATM TERMINAL - SECURE LOGIN");
+        setTitle("ATM - Secure Login");
         setLayout(null);
-        getContentPane().setBackground(new Color(45,45,45));
+        getContentPane().setBackground(UITheme.BG);
 
-        // ===== SCREEN =====
+        JLabel title = UITheme.title("ATM Access");
+        title.setBounds(130, 18, 240, 34);
+        add(title);
+
         JPanel screen = new JPanel(null);
-        screen.setBounds(30,20,425,150);
-        screen.setBackground(new Color(180,200,180));
-        screen.setBorder(BorderFactory.createLineBorder(Color.BLACK,2));
+        screen.setBounds(34, 65, 430, 170);
+        screen.setBackground(UITheme.PANEL);
+        screen.setBorder(BorderFactory.createLineBorder(new Color(120, 140, 130), 2));
         add(screen);
 
-        JLabel c = new JLabel("CARD NUMBER:");
-        c.setBounds(40,40,120,30);
+        JLabel c = new JLabel("Card Number");
+        c.setBounds(34, 38, 110, 24);
+        c.setForeground(UITheme.TEXT_DARK);
         screen.add(c);
 
-        cardField = new JTextField();
-        cardField.setBounds(170,40,200,30);
+        cardField = UITheme.inputField();
+        cardField.setBounds(150, 34, 240, 32);
         screen.add(cardField);
 
-        JLabel p = new JLabel("PIN:");
-        p.setBounds(40,90,120,30);
+        JLabel p = new JLabel("PIN");
+        p.setBounds(34, 95, 110, 24);
+        p.setForeground(UITheme.TEXT_DARK);
         screen.add(p);
 
-        pinField = new JPasswordField();
-        pinField.setBounds(170,90,200,30);
+        pinField = UITheme.passwordField();
+        pinField.setBounds(150, 91, 240, 32);
         screen.add(pinField);
 
         activeField = cardField;
-
         cardField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent e) {
                 activeField = cardField;
             }
         });
-
         pinField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent e) {
                 activeField = pinField;
             }
         });
 
-        // ===== KEYPAD =====
-        JPanel keypad = new JPanel(new GridLayout(4,3,10,10));
-        keypad.setBounds(85,180,315,240);
-        keypad.setBackground(new Color(45,45,45));
+        JPanel keypad = new JPanel(new GridLayout(4, 3, 10, 10));
+        keypad.setBounds(94, 250, 300, 220);
+        keypad.setBackground(UITheme.BG);
         add(keypad);
 
-        for(int i=1;i<=9;i++) keypad.add(createKey(String.valueOf(i)));
+        for (int i = 1; i <= 9; i++) keypad.add(createKey(String.valueOf(i)));
 
-        JButton clear = new JButton("CLEAR");
-        clear.setBackground(Color.RED);
-        clear.setForeground(Color.WHITE);
-        clear.setFocusPainted(false);
+        JButton clear = UITheme.dangerButton("CLEAR");
         clear.addActionListener(e -> {
             cardField.setText("");
             pinField.setText("");
             activeField = cardField;
+            cardField.requestFocus();
         });
 
         JButton zero = createKey("0");
 
-        JButton ok = new JButton("OK");
-        ok.setBackground(Color.GREEN);
-        ok.setForeground(Color.WHITE);
-        ok.setFocusPainted(false);
+        JButton ok = UITheme.successButton("LOGIN");
         ok.addActionListener(e -> handleLogin());
 
         keypad.add(clear);
         keypad.add(zero);
         keypad.add(ok);
 
-        JButton signUp = new JButton("NEW USER? REGISTER HERE");
-        signUp.setBounds(125,440,230,30);
-        signUp.setBackground(Color.BLACK);
-        signUp.setForeground(Color.WHITE);
-        signUp.setFocusPainted(false);
+        JButton signUp = UITheme.primaryButton("NEW USER? REGISTER HERE");
+        signUp.setBounds(134, 482, 230, 34);
         signUp.addActionListener(e -> {
             dispose();
             new SignUpPageOne();
         });
         add(signUp);
 
-        setSize(500,550);
+        setSize(500, 580);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
 
     private JButton createKey(String text) {
-        JButton b = new JButton(text);
-        b.setBackground(Color.BLACK);
-        b.setForeground(Color.WHITE);
-        b.setFocusPainted(false);
+        JButton b = UITheme.primaryButton(text);
         b.addActionListener(e -> {
-            if(activeField!=null)
-                activeField.setText(activeField.getText()+text);
+            if (activeField != null) {
+                activeField.setText(activeField.getText() + text);
+            }
         });
         return b;
     }
 
     private void handleLogin() {
-
         String card = cardField.getText().trim();
         String pin = new String(pinField.getPassword()).trim();
 
-        if(card.isEmpty() || pin.isEmpty()) {
-            JOptionPane.showMessageDialog(this,"Please enter Card Number and PIN");
+        if (!card.matches("\\d{16}")) {
+            JOptionPane.showMessageDialog(this, "Card Number must be 16 digits.");
             return;
         }
 
-        try(Connection con = DBConnection.getConnection()) {
+        if (!pin.matches("\\d{4}")) {
+            JOptionPane.showMessageDialog(this, "PIN must be 4 digits.");
+            return;
+        }
 
-            PreparedStatement ps =
-                con.prepareStatement(
-                    "SELECT * FROM users WHERE card_no=? AND pin=?"
-                );
-
+        try (Connection con = DBConnection.getConnection()) {
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT card_no FROM users WHERE card_no=? AND pin=?"
+            );
             ps.setString(1, card);
             ps.setString(2, pin);
 
             ResultSet rs = ps.executeQuery();
-
-            if(rs.next()) {
+            if (rs.next()) {
                 dispose();
                 new ATMMenu(card);
             } else {
@@ -143,9 +136,13 @@ public class Login extends JFrame {
                     JOptionPane.ERROR_MESSAGE
                 );
             }
-
-        } catch(Exception e){
-            JOptionPane.showMessageDialog(this,"Database Error");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Database Error: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 

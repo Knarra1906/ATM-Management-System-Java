@@ -1,49 +1,50 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
 
 public class ATMMenu extends JFrame {
 
-    String cardNo;
+    private final String cardNo;
 
     public ATMMenu(String cardNo) {
-
         this.cardNo = cardNo;
 
-        setTitle("ATM MENU");
+        setTitle("ATM Menu");
         setLayout(null);
-        getContentPane().setBackground(new Color(45, 45, 45));
+        getContentPane().setBackground(UITheme.BG);
 
-        // ===== SCREEN PANEL =====
+        JLabel title = UITheme.title("Choose Transaction");
+        title.setBounds(130, 20, 260, 34);
+        add(title);
+
         JPanel screen = new JPanel(null);
-        screen.setBounds(40, 30, 400, 250);
-        screen.setBackground(new Color(170, 190, 170));
-        screen.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        screen.setBounds(32, 65, 435, 340);
+        screen.setBackground(UITheme.PANEL);
+        screen.setBorder(BorderFactory.createLineBorder(new Color(120, 140, 130), 2));
         add(screen);
 
-        JLabel title = new JLabel("SELECT TRANSACTION", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 18));
-        title.setBounds(50, 10, 300, 30);
-        screen.add(title);
-
-        // ===== BUTTONS =====
-        JButton deposit = createBtn("DEPOSIT", 40, 60);
-        JButton withdraw = createBtn("WITHDRAW", 210, 60);
-        JButton balance = createBtn("BALANCE", 40, 120);
-        JButton logout = createBtn("LOGOUT", 210, 120);
+        JButton deposit = menuButton("Deposit", 34, 34);
+        JButton withdraw = menuButton("Withdraw", 232, 34);
+        JButton balance = menuButton("Balance", 34, 98);
+        JButton fastCash = menuButton("Fast Cash", 232, 98);
+        JButton logout = UITheme.dangerButton("Logout");
+        logout.setBounds(132, 240, 170, 40);
 
         deposit.addActionListener(e -> {
             dispose();
             new Deposit(cardNo);
         });
-
         withdraw.addActionListener(e -> {
             dispose();
             new Withdraw(cardNo);
         });
-
-        balance.addActionListener(e -> checkBalance());
-
+        balance.addActionListener(e -> {
+            dispose();
+            new BalanceEnquiry(cardNo);
+        });
+        fastCash.addActionListener(e -> {
+            dispose();
+            new FastCash(cardNo);
+        });
         logout.addActionListener(e -> {
             dispose();
             new Login();
@@ -52,62 +53,18 @@ public class ATMMenu extends JFrame {
         screen.add(deposit);
         screen.add(withdraw);
         screen.add(balance);
+        screen.add(fastCash);
         screen.add(logout);
 
-        setSize(500, 360);
+        setSize(500, 470);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    // ===== COMMON BUTTON STYLE =====
-    private JButton createBtn(String text, int x, int y) {
-        JButton btn = new JButton(text);
-        btn.setBounds(x, y, 150, 40);
-        btn.setBackground(Color.BLACK);
-        btn.setForeground(Color.WHITE);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createRaisedBevelBorder());
+    private JButton menuButton(String text, int x, int y) {
+        JButton btn = UITheme.primaryButton(text);
+        btn.setBounds(x, y, 170, 40);
         return btn;
-    }
-
-    // ===== BALANCE ENQUIRY =====
-    private void checkBalance() {
-        try (Connection con = DBConnection.getConnection()) {
-
-            PreparedStatement ps =
-                con.prepareStatement(
-                    "SELECT balance FROM accounts WHERE card_no=?"
-                );
-            ps.setString(1, cardNo);
-
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Available Balance : ₹" + rs.getDouble("balance"),
-                    "Balance Enquiry",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-            } else {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Account not found",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(
-                this,
-                "Database Error",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-        }
     }
 }
