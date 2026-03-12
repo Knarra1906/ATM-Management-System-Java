@@ -8,8 +8,8 @@ public class DBConnection {
             "ATM_DB_URL",
             "jdbc:mysql://localhost:3306/atmdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
         );
-        String user = readEnv("ATM_DB_USER", "root");
-        String pass = readEnv("ATM_DB_PASS", "Saikiran@123");
+        String user = readEnv("ATM_DB_USER", "YOUR_USERNAME");
+        String pass = readEnv("ATM_DB_PASS", "YOUR_PASSWORD");
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
