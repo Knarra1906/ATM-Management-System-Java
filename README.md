@@ -19,20 +19,22 @@ Java Swing ATM simulation backed by MySQL and JDBC.
 - Java Swing
 - MySQL
 - JDBC with MySQL Connector/J
+- IntelliJ IDEA
 
 ## Project Structure
 
-- `src/Login.java`: main login screen
-- `src/SignUpPageOne.java`: personal details and DOB validation
-- `src/SignUpPageTwo.java`: additional details
-- `src/SignUpPageThree.java`: account issuance rules and final account setup
-- `src/ATMMenu.java`: transaction menu
-- `src/Deposit.java`: deposit screen
-- `src/Withdraw.java`: manual withdraw screen
-- `src/FastCash.java`: preset withdrawals like `100`, `500`, `1000`
-- `src/BalanceEnquiry.java`: balance screen
-- `src/DBConnection.java`: JDBC connection and schema self-healing
-- `src/database.sql`: schema and sample data
+- `src/Login.java` - application entry point and login screen
+- `src/SignUpPageOne.java` - personal details and DOB validation
+- `src/SignUpPageTwo.java` - additional applicant details
+- `src/SignUpPageThree.java` - account creation rules and final setup
+- `src/ATMMenu.java` - transaction menu after login
+- `src/Deposit.java` - deposit screen
+- `src/Withdraw.java` - withdraw screen
+- `src/FastCash.java` - preset withdrawal amounts
+- `src/BalanceEnquiry.java` - balance screen
+- `src/DBConnection.java` - JDBC connection and schema checks
+- `src/database.sql` - base schema and sample data
+- `lib/mysql-connector-j-9.5.0.jar` - MySQL JDBC driver
 
 ## Business Rules
 
@@ -40,53 +42,45 @@ Java Swing ATM simulation backed by MySQL and JDBC.
 - Users below 18 are restricted to a joint account with a nominee.
 - Minors do not receive ATM card credentials during signup.
 
-## Database
+## Database Setup
 
-The application expects database `atmdb`.
+The application connects to MySQL database `atmdb`.
 
-Main tables:
+1. Create the database in MySQL.
+2. Run the SQL script from `src/database.sql`.
+3. Confirm the MySQL server is running before starting the app.
 
-- `signup_page1`
-- `signup_page2`
-- `users`
-- `accounts`
-- `transactions`
+`DBConnection.java` also creates the runtime tables `accounts` and `transactions` if they are missing, and it adds required columns to `signup_page2` when needed.
 
-`DBConnection.java` also ensures missing runtime tables and required signup columns are created automatically when the app connects.
+## Run In IntelliJ IDEA
 
-## Run
+1. Open the project folder in IntelliJ IDEA.
+2. Set the project SDK to a working Java version.
+3. Add `lib/mysql-connector-j-9.5.0.jar` as a library if IntelliJ does not detect it automatically.
+4. Ensure MySQL is running and the `atmdb` schema is available.
+5. Open `src/Login.java` and run the `main` method.
 
-1. Create the schema:
+## Optional Environment Variables
 
-```sql
-source src/database.sql;
-```
-
-2. Compile:
-
-```powershell
-javac -d out src\*.java
-```
-
-3. Run:
-
-```powershell
-java -cp "out;lib/mysql-connector-j-9.5.0.jar" Login
-```
-
-You can also use the VS Code launch configuration already included in the repo.
-
-## Environment Variables
-
-Optional variables supported by the app:
+The app supports these environment variables:
 
 - `ATM_DB_URL`
 - `ATM_DB_USER`
 - `ATM_DB_PASS`
 
-If not set, the project falls back to the defaults in `DBConnection.java`.
+If they are not set, the code falls back to the defaults in `src/DBConnection.java`.
+
+## Terminal Run
+
+If you want to run the project outside IntelliJ:
+
+```powershell
+javac -cp "lib/mysql-connector-j-9.5.0.jar" -d out src\*.java
+java -cp "out;lib/mysql-connector-j-9.5.0.jar" Login
+```
 
 ## Notes
 
-- The app uses Swing screens, so runtime verification is partly manual.
-- Fast cash transactions are stored with type `FAST_CASH`.
+- This is a Swing desktop application, so final verification is manual.
+- Fast cash transactions are stored with transaction type `FAST_CASH`.
+- IDE-specific folders such as `.vscode` and `.idea` are not required for running the project.
