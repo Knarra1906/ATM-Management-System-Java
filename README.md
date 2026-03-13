@@ -2,6 +2,10 @@
 
 Java Swing ATM simulation backed by MySQL and JDBC.
 
+## Overview
+
+This project simulates a desktop ATM workflow with account registration, login, and core banking actions. It is built as a Java Swing application and uses MySQL for user, account, and transaction data.
+
 ## Features
 
 - Secure login with card number and PIN
@@ -20,6 +24,12 @@ Java Swing ATM simulation backed by MySQL and JDBC.
 - MySQL
 - JDBC with MySQL Connector/J
 - IntelliJ IDEA
+
+## Prerequisites
+
+- Java JDK installed and configured in IntelliJ IDEA
+- MySQL Server running locally
+- MySQL Connector/J available in `lib/mysql-connector-j-9.5.0.jar`
 
 ## Project Structure
 
@@ -51,6 +61,23 @@ The application connects to MySQL database `atmdb`.
 3. Confirm the MySQL server is running before starting the app.
 
 `DBConnection.java` also creates the runtime tables `accounts` and `transactions` if they are missing, and it adds required columns to `signup_page2` when needed.
+
+## Default Database Connection
+
+If environment variables are not set, the app uses the fallback values currently defined in `src/DBConnection.java`:
+
+- URL: `jdbc:mysql://localhost:3306/atmdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC`
+- User: `root`
+- Password: `Saikiran@123`
+
+Change these before sharing the project publicly if they are real local credentials.
+
+## Sample Login
+
+The SQL script includes an optional seeded user for testing:
+
+- Card Number: `1234567890123456`
+- PIN: `1234`
 
 ## Run In IntelliJ IDEA
 
@@ -84,3 +111,4 @@ java -cp "out;lib/mysql-connector-j-9.5.0.jar" Login
 - This is a Swing desktop application, so final verification is manual.
 - Fast cash transactions are stored with transaction type `FAST_CASH`.
 - IDE-specific folders such as `.vscode` and `.idea` are not required for running the project.
+- The repository is intended to be run through standard source files and database setup, not IDE-generated build artifacts.
